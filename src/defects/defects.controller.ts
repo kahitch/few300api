@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Res, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Res, HttpStatus, Param } from '@nestjs/common';
 import { DefectRequest } from './DefectRequest';
 import { DefectResponse } from './DefectResponse';
 import * as cuid from 'cuid';
@@ -25,6 +25,8 @@ export class DefectsController {
         },
     ];
 
+    updateObject: Defect;
+
     @Get()
     getDefects() {
         return { data: this.database };
@@ -47,6 +49,17 @@ export class DefectsController {
             this.database.push(response);
             res.status(HttpStatus.CREATED).send(response);
         }
+    }
+
+    @Put(':id')
+    async updateDefect(@Param('id') id: string, @Body() def: DefectRequest, @Res() res: Response) {
+        if (def.title.toLowerCase() === 'darth') {
+            res.status(HttpStatus.BAD_REQUEST).send();
+        } else {
+            this.updateObject = this.database.find(o => o.id === id);
+            this.updateObject = { ...this.updateObject, ...def };
+        }
+
     }
 
 }
