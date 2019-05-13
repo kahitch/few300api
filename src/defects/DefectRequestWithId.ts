@@ -1,4 +1,5 @@
-export class DefectRequest {
+export class DefectRequestWithId {
+    id: string;
     title: string;
     dateSubmitted: string;
     description: string;

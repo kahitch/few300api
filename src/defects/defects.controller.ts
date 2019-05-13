@@ -1,3 +1,4 @@
+import { DefectRequestWithId } from './DefectRequestWithId';
 import { Controller, Get, Post, Put, Body, Res, HttpStatus, Param } from '@nestjs/common';
 import { DefectRequest } from './DefectRequest';
 import { DefectResponse } from './DefectResponse';
@@ -26,6 +27,8 @@ export class DefectsController {
     ];
 
     updateObject: Defect;
+    updateObjectIndex: number;
+    idCount: number = 3;
 
     @Get()
     getDefects() {
@@ -34,12 +37,14 @@ export class DefectsController {
 
     @Post()
     async addDefect(@Body() def: DefectRequest, @Res() res: Response) {
+        // await this.delay(5000);
         if (def.title.toLowerCase() === 'darth') {
             res.status(HttpStatus.BAD_REQUEST).send();
         } else {
-            const newId = cuid();
+            // const newId = cuid();
             const response = new DefectResponse();
-            response.id = newId;
+            // response.id = newId;
+            response.id = String(++this.idCount);
             response.title = def.title;
             response.dateSubmitted = new Date().toISOString();
             response.description = def.description;
@@ -49,19 +54,25 @@ export class DefectsController {
             this.database.push(response);
             res.status(HttpStatus.CREATED).send(response);
         }
+
+        // function delay(ms: number) {
+        //     return new Promise(resolve => setTimeout(resolve, ms));
+        // }
+
     }
 
-    @Put(':id')
-    async updateDefect(@Param('id') id: string, @Body() def: DefectRequest, @Res() res: Response) {
+    @Put()
+    async updateDefect(@Body() def: DefectRequestWithId, @Res() res: Response) {
         if (def.title.toLowerCase() === 'darth') {
             res.status(HttpStatus.BAD_REQUEST).send();
         } else {
-            this.updateObject = this.database.find(o => o.id === id);
-            this.updateObject = { ...this.updateObject, ...def };
+            this.updateObject = this.database.find(o => o.id === def.id);
+            this.updateObjectIndex = this.database.indexOf(this.updateObject)
+            this.database[this.updateObjectIndex] = { ...this.updateObject, ...def };
+            res.status(HttpStatus.OK).send(this.database[this.updateObjectIndex]);
         }
 
     }
-
 }
 
 interface Defect {
